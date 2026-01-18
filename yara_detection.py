@@ -5,14 +5,8 @@ import yara
 import json
 from typing import List, Dict, Any
 
-# ──────────────────────────────────────────────
-# CONFIGURATION - À personnaliser selon tes besoins
-# ──────────────────────────────────────────────
-
-# Dossier contenant tes fichiers .yar (ou .yara)
 RULES_DIRECTORY = Path("yara_rules")
 
-# Règles par défaut si aucun --rules n'est fourni
 DEFAULT_RULE_FILES = [
     "pdf_basic_suspicious.yar",
     "pdf_javascript_obf.yar",
@@ -20,7 +14,6 @@ DEFAULT_RULE_FILES = [
     "pdf_openaction_aa.yar",
 ]
 
-# Score par règle (tu peux ajouter des meta: score = 30 dans tes règles)
 DEFAULT_RULE_SCORES = {
     "pdf_javascript_obf": 35,
     "pdf_openaction_js": 40,
@@ -29,13 +22,8 @@ DEFAULT_RULE_SCORES = {
     "pdf_high_entropy": 15,
 }
 
-# Seuil de détection
 SUSPICIOUS_THRESHOLD = 40
 MALICIOUS_THRESHOLD  = 70
-
-# ──────────────────────────────────────────────
-# Fonctions principales
-# ──────────────────────────────────────────────
 
 def load_yara_rules(rule_paths: List[Path]) -> yara.Rules:
     """Compile toutes les règles YARA passées en paramètre"""
@@ -76,8 +64,6 @@ def scan_pdf_with_yara(pdf_path: Path, rules: yara.Rules) -> Dict[str, Any]:
     detections = []
 
     for match in matches:
-        
-        #Cas 1 : ancienne API → match est une string
         if isinstance(match, str):
             rule_name = match
             score = DEFAULT_RULE_SCORES.get(rule_name, 10)
@@ -89,8 +75,6 @@ def scan_pdf_with_yara(pdf_path: Path, rules: yara.Rules) -> Dict[str, Any]:
                 "meta": {},
                 "matched_strings": []
             })
-
-        # Cas 2 : nouvelle API → objet Match
         else:
             rule_name = match.rule
             score = match.meta.get("weight", DEFAULT_RULE_SCORES.get(rule_name, 10))
@@ -138,7 +122,6 @@ def main():
         print(f"[!] Chemin introuvable : {target}")
         sys.exit(1)
 
-    # Chargement des règles
     if args.rules:
         rule_paths = [Path(r) for r in args.rules]
     else:
@@ -152,7 +135,6 @@ def main():
 
     results = []
 
-    # Scan
     if target.is_file() and target.suffix.lower() == ".pdf":
         result = scan_pdf_with_yara(target, yara_rules)
         results.append(result)
@@ -164,7 +146,6 @@ def main():
         print("[!] Spécifiez un fichier .pdf ou un dossier")
         sys.exit(1)
 
-    # Affichage
     if args.json:
         print(json.dumps(results, indent=2, ensure_ascii=False))
     else:
@@ -179,7 +160,6 @@ def main():
                     if d['meta']:
                         print(f"      Meta: {d['meta']}")
 
-    # Résumé global
     if len(results) > 1:
         malicious = sum(1 for r in results if r["score"] >= MALICIOUS_THRESHOLD)
         suspicious = sum(1 for r in results if SUSPICIOUS_THRESHOLD <= r["score"] < MALICIOUS_THRESHOLD)
