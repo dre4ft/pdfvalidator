@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+benign/
+malicious/
+results/
+tests/
+benign11/
+fake_pdfa_*.pdf
+benign_kpi.json
+gen_mal_pdf/__pycache__/
+venv/
+suspicious_pdfs/
+.DS_Store

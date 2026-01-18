@@ -1,0 +1,7 @@
+gs -dPDFA=2 -dBATCH -dNOPAUSE \
+   -sDEVICE=pdfwrite \
+   -dPDFACompatibilityPolicy=1 \
+   -sColorConversionStrategy=RGB \
+   -dEmbedAllFonts=true -dSubsetFonts=true \
+   -dHaveTransparency=false \
+   -sOutputFile=safe.pdf input.pdf

