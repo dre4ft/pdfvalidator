@@ -2,6 +2,7 @@ import subprocess
 import json
 import os
 from clean_result import clean_result
+import time
 
 def run_validation(is_malicious,pdf_path):
     change_ext = False
@@ -37,6 +38,7 @@ def iter(dir):
 
     if dir != "benign":
         is_malicious = True
+        
     for filename in os.listdir(dir):
 
         run_validation(is_malicious,os.path.join(dir, filename))
@@ -44,4 +46,4 @@ def iter(dir):
 
 if __name__ == "__main__":
    
-    run_validation(False,"benign/1-meredith-filak.pdf")
+    iter("benign")

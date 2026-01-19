@@ -4,6 +4,8 @@ from pathlib import Path
 import yara
 import json
 from typing import List, Dict, Any
+import time
+import os
 
 RULES_DIRECTORY = Path("yara_rules")
 
@@ -40,7 +42,7 @@ def load_yara_rules(rule_paths: List[Path]) -> yara.Rules:
 
     try:
         rules = yara.compile(sources=sources)
-        print(f"[+] {len(sources)} règles YARA compilées avec succès")
+       # print(f"[+] {len(sources)} règles YARA compilées avec succès")
         return rules
     except Exception as e:
         print(f"[!] Erreur de syntaxe dans les règles YARA :\n{e}")
@@ -165,6 +167,11 @@ def main():
         suspicious = sum(1 for r in results if SUSPICIOUS_THRESHOLD <= r["score"] < MALICIOUS_THRESHOLD)
         print(f"\nRésumé : {malicious} malveillants | {suspicious} suspects | {len(results)-malicious-suspicious} bénins")
 
+def count_yara_rules(path):
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    return text.count("rule ")
 
 if __name__ == "__main__":
-    main()
+   main()
+   #result = count_yara_rules(Path("yara_rules/pdf.yara"))
+  # print(f"{result} règles YARA dans pdf.yara")

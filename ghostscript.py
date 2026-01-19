@@ -1,4 +1,6 @@
 import subprocess
+import time
+import os
 
 def convert_to_pdfa(input_file: str, output_file: str) -> None:
     """Convert PDF to PDF/A-2 format using Ghostscript."""
@@ -16,7 +18,7 @@ def convert_to_pdfa(input_file: str, output_file: str) -> None:
         f"-sOutputFile={output_file}",
         input_file
     ]
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd,stdout=subprocess.PIPE,  
+        stderr=subprocess.PIPE,   
+        text=True)
 
-# Usage
-convert_to_pdfa("input.pdf", "safe.pdf")
