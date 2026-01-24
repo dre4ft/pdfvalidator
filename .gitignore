@@ -11,3 +11,4 @@ gen_mal_pdf/__pycache__/
 venv/
 suspicious_pdfs/
 .DS_Store
+*.log

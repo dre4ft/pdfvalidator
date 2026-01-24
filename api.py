@@ -35,7 +35,7 @@ async def scan_remote(files: List[UploadFile] = File(...)):
 async def update_yara_rules(rules: str = Body(..., media_type="text/plain")):
     YARA_RULES_FILE = "yara_rules/pdf.yara"
     with open(YARA_RULES_FILE, "a") as f:
-        f.write(rules)
+        f.write("\n"+rules)
     
     return JSONResponse(content={"status": "YARA rules updated successfully."})
 
