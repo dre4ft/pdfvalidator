@@ -1,7 +1,7 @@
 import subprocess
 import json
 import os
-from clean_result import clean_result
+from test.clean_result import clean_result
 import time
 
 def run_validation(is_malicious,pdf_path):

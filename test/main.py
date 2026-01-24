@@ -1,7 +1,7 @@
 import os 
-from runner import iter, run_validation
+from test.runner import iter, run_validation
 from kpi import gen_kpi, save_kpi, mal_kpi, ben_kpi
-from caster import add_fake_pdfa_metadata
+from test.caster import add_fake_pdfa_metadata
 
 if not os.path.isdir("results"):
     os.mkdir("results")

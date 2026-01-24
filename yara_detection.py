@@ -4,31 +4,16 @@ from pathlib import Path
 import yara
 import json
 from typing import List, Dict, Any
-import time
-import os
 
-RULES_DIRECTORY = Path("yara_rules")
 
-DEFAULT_RULE_FILES = [
-    "pdf_basic_suspicious.yar",
-    "pdf_javascript_obf.yar",
-    "pdf_embedded_suspect.yar",
-    "pdf_openaction_aa.yar",
-]
-
-DEFAULT_RULE_SCORES = {
-    "pdf_javascript_obf": 35,
-    "pdf_openaction_js": 40,
-    "pdf_embedded_exe": 45,
-    "pdf_multiple_filters": 20,
-    "pdf_high_entropy": 15,
-}
-
+DEFAULT_RULE_FILES = [Path("yara_rules/pdf.yara")]
 SUSPICIOUS_THRESHOLD = 40
 MALICIOUS_THRESHOLD  = 70
 
-def load_yara_rules(rule_paths: List[Path]) -> yara.Rules:
+def load_yara_rules(rule_paths: List[Path] = None) -> yara.Rules:
     """Compile toutes les règles YARA passées en paramètre"""
+    if rule_paths is None:
+        rule_paths = DEFAULT_RULE_FILES
     sources = {}
     for path in rule_paths:
         if path.exists():
@@ -65,41 +50,29 @@ def scan_pdf_with_yara(pdf_path: Path, rules: yara.Rules) -> Dict[str, Any]:
     total_score = 0
     detections = []
 
-    for match in matches:
-        if isinstance(match, str):
-            rule_name = match
-            score = DEFAULT_RULE_SCORES.get(rule_name, 10)
+    for match in matches: 
+        rule_name = match.rule
+        score = match.meta.get("weight", 10)  
+        total_score += score
 
-            total_score += score
-            detections.append({
-                "rule": rule_name,
-                "score": score,
-                "meta": {},
-                "matched_strings": []
-            })
-        else:
-            rule_name = match.rule
-            score = match.meta.get("weight", DEFAULT_RULE_SCORES.get(rule_name, 10))
-            total_score += score
-
-            detections.append({
-                "rule": rule_name,
-                "score": score,
-                "meta": match.meta,
-                "matched_strings": [
-                    {
-                        "name": s.identifier,
-                        "matches": [
-                            {
-                                "offset": inst.offset,
-                                "data": inst.matched_data.hex()[:32] + "..."
-                            }
-                            for inst in s.instances
-                        ]
-                    }
-                    for s in match.strings
-                ]
-            })
+        detections.append({
+            "rule": rule_name,
+            "score": score,
+            "meta": match.meta,
+            "matched_strings": [
+                {
+                    "name": s.identifier,
+                    "matches": [
+                        {
+                            "offset": inst.offset,
+                            "data": inst.matched_data.hex()[:32] + "..."
+                        }
+                        for inst in s.instances
+                    ]
+                }
+                for s in match.strings
+            ]
+        })
 
     verdict = "malveillant" if total_score >= MALICIOUS_THRESHOLD else \
               "suspect" if total_score >= SUSPICIOUS_THRESHOLD else "bénin"
@@ -127,7 +100,7 @@ def main():
     if args.rules:
         rule_paths = [Path(r) for r in args.rules]
     else:
-        rule_paths = [RULES_DIRECTORY / f for f in DEFAULT_RULE_FILES if (RULES_DIRECTORY / f).exists()]
+        rule_paths = DEFAULT_RULE_FILES
 
     if not rule_paths:
         print("[!] Aucune règle trouvée. Créez un dossier yara_rules/ avec vos .yar")
@@ -167,11 +140,11 @@ def main():
         suspicious = sum(1 for r in results if SUSPICIOUS_THRESHOLD <= r["score"] < MALICIOUS_THRESHOLD)
         print(f"\nRésumé : {malicious} malveillants | {suspicious} suspects | {len(results)-malicious-suspicious} bénins")
 
-def count_yara_rules(path):
-    text = path.read_text(encoding="utf-8", errors="ignore")
-    return text.count("rule ")
+def simple_scan(pdf_path: str,rules = None) :
+    """Fonction utilitaire pour scanner un PDF avec les règles par défaut"""
+    yara_rules = load_yara_rules() if rules is None else rules    
+    return scan_pdf_with_yara(Path(pdf_path), yara_rules)
 
 if __name__ == "__main__":
-   main()
-   #result = count_yara_rules(Path("yara_rules/pdf.yara"))
-  # print(f"{result} règles YARA dans pdf.yara")
+   #main()
+   print(simple_scan("benign/0_ea-2a_1108.pdf"))
