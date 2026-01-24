@@ -10,21 +10,63 @@
   <div class="container">
     <div class="header">
       <h1>PDF Validator</h1>
-      
     </div>
 
-    <div id="dropzone" class="dropzone">
-      <p>Glissez-déposez vos fichiers ou dossiers PDF ici</p>
-      <small>Cliquez ou déposez pour lancer l’analyse</small>
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="scan">Scan PDF</button>
+      <button class="tab" data-tab="yara">Règles YARA</button>
     </div>
 
-    <div class="disclaimer">
-      ⚠️ <strong>Avertissement :</strong> Cette analyse repose exclusivement sur des règles YARA.
-      La qualité des résultats dépend directement de ces règles et peut donc être incomplète ou
-      produire des faux positifs / faux négatifs.
+    <!-- ============================== -->
+    <!-- TAB : SCAN -->
+    <!-- ============================== -->
+    <div class="tab-content active" id="tab-scan">
+      <div id="dropzone" class="dropzone">
+        <p>Glissez-déposez vos fichiers ou dossiers PDF ici</p>
+        <small>Cliquez ou déposez pour lancer l’analyse</small>
+      </div>
+
+      <div class="disclaimer">
+        ⚠️ <strong>Avertissement :</strong> Cette analyse repose exclusivement sur des règles YARA.
+        La qualité des résultats dépend directement de ces règles et peut donc être incomplète ou
+        produire des faux positifs / faux négatifs.
+      </div>
+
+      <div id="log" class="log"></div>
     </div>
 
-    <div id="log" class="log"></div>
+    <!-- ============================== -->
+    <!-- TAB : YARA -->
+    <!-- ============================== -->
+    <div class="tab-content" id="tab-yara">
+      <h2>Règles YARA</h2>
+
+      <p class="yara-info">
+        Les règles ci-dessous sont utilisées pour l’analyse des PDF.
+        Toute modification impacte directement la fiabilité des résultats.
+      </p>
+
+      <label for="yaraRules">Règles actuelles :</label>
+      <textarea
+        id="yaraRules"
+        class="yara-textarea"
+        readonly
+      >Chargement des règles YARA...</textarea>
+
+      <label for="yaraNew">Ajouter de nouvelles règles :</label>
+      <textarea
+        id="yaraNew"
+        class="yara-textarea"
+        placeholder="rule suspicious_pdf { condition: true }"
+      ></textarea>
+
+      <button id="updateYaraBtn" class="btn">
+        Mettre à jour les règles YARA
+      </button>
+
+      <div id="yaraStatus" class="yara-status"></div>
+    </div>
   </div>
 
   <script src="/static/app.js"></script>

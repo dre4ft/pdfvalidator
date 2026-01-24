@@ -171,3 +171,24 @@ $magic = { 25 50 44 46 }
 condition:
 $magic in (5..1024) and #magic == 1
 }
+rule PDF_Malicious_XML_XFA
+{
+    meta:
+        description = "Detects malicious PDF using embedded XML/XFA"
+        author = "ChatGPT"
+        reference = "Generic PDF XML/XFA malware detection"
+
+    strings:
+        $pdf_header = "%PDF"
+        $xfa        = "/XFA"
+        $xml_tag1   = "<xfa:"
+        $xml_tag2   = "<xdp:xdp"
+        $js         = "script" nocase
+        $launch     = "/Launch"
+
+    condition:
+        $pdf_header at 0 and
+        $xfa and
+        any of ($xml_tag*) and
+        any of ($js, $launch)
+}

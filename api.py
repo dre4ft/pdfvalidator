@@ -1,4 +1,4 @@
-from fastapi import  APIRouter, UploadFile, File, Body
+from fastapi import  APIRouter, UploadFile, File, Body,HTTPException
 from pdf_validator import api_runner
 from fastapi.responses import JSONResponse
 from typing import List
@@ -31,6 +31,24 @@ async def scan_remote(files: List[UploadFile] = File(...)):
     "status": result
     })
 
+@api_router.post("/yara/update")
+async def update_yara_rules(rules: str = Body(..., media_type="text/plain")):
+    YARA_RULES_FILE = "yara_rules/pdf.yara"
+    with open(YARA_RULES_FILE, "a") as f:
+        f.write(rules)
+    
+    return JSONResponse(content={"status": "YARA rules updated successfully."})
+
+@api_router.get("/yara/rules")
+async def get_yara_rules():
+    YARA_RULES_FILE = "yara_rules/pdf.yara"
+    if not os.path.isfile(YARA_RULES_FILE):
+        raise HTTPException(status_code=404, detail="YARA rules file not found.")
+
+    with open(YARA_RULES_FILE, "r") as f:
+        rules = f.read()
+    
+    return JSONResponse(content={"rules": rules})
 
 
 

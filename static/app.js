@@ -1,21 +1,37 @@
+// ===============================
+// ELEMENTS DOM
+// ===============================
 const dropzone = document.getElementById('dropzone');
 const log = document.getElementById('log');
-const toggle = document.getElementById('modeToggle');
-const localLabel = document.getElementById('localLabel');
-const remoteLabel = document.getElementById('remoteLabel');
 
-function updateModeUI() {
-  if (toggle.checked) {
-    localLabel.classList.remove('active');
-    remoteLabel.classList.add('active');
-  } else {
-    remoteLabel.classList.remove('active');
-    localLabel.classList.add('active');
-  }
-}
+const yaraRulesArea = document.getElementById('yaraRules');
+const yaraNewArea = document.getElementById('yaraNew');
+const yaraStatus = document.getElementById('yaraStatus');
+const updateYaraBtn = document.getElementById('updateYaraBtn');
 
-toggle.addEventListener('change', updateModeUI);
+const tabs = document.querySelectorAll('.tab');
+const contents = document.querySelectorAll('.tab-content');
 
+
+// ===============================
+// TAB NAVIGATION
+// ===============================
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+
+    tab.classList.add('active');
+    document
+      .getElementById(`tab-${tab.dataset.tab}`)
+      .classList.add('active');
+  });
+});
+
+
+// ===============================
+// DRAG & DROP
+// ===============================
 ['dragenter', 'dragover'].forEach(event => {
   dropzone.addEventListener(event, e => {
     e.preventDefault();
@@ -38,15 +54,24 @@ dropzone.addEventListener('drop', e => {
 dropzone.addEventListener('click', () => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.multiple = true;
   input.accept = '.pdf';
+  input.multiple = true;
   input.onchange = () => handleFiles(Array.from(input.files));
   input.click();
 });
 
+
+// ===============================
+// SCAN HANDLER (REMOTE)
+// ===============================
 async function handleFiles(files) {
   if (!files.length) return;
-  log.textContent += '[REMOTE] Appel API /api/scan/remote\n';
+
+  const scanTab = document.getElementById('tab-scan');
+  if (!scanTab.classList.contains('active')) return;
+
+  log.textContent += '\n[REMOTE] Appel API /api/scan/remote\n';
+
   const formData = new FormData();
   files.forEach(f => formData.append('files', f));
 
@@ -55,10 +80,61 @@ async function handleFiles(files) {
       method: 'POST',
       body: formData
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
     const result = await response.json();
-    log.textContent += `Réponse: ${JSON.stringify(result)}\n`;
+    log.textContent += `Résultat:\n${JSON.stringify(result, null, 2)}\n`;
   } catch (err) {
-    log.textContent += `Erreur API: ${err}\n`;
+    log.textContent += `❌ Erreur API: ${err.message}\n`;
   }
-  
 }
+
+
+// ===============================
+// YARA RULES MANAGEMENT
+// ===============================
+async function loadYaraRules() {
+  try {
+    const res = await fetch('/api/yara/rules');
+    if (!res.ok) throw new Error('Erreur chargement règles');
+    const data = await res.json();
+    yaraRulesArea.value = data.rules;
+  } catch (err) {
+    yaraRulesArea.value = 'Erreur lors du chargement des règles YARA.';
+  }
+}
+
+async function updateYaraRules() {
+  const newRules = yaraNewArea.value.trim();
+  if (!newRules) {
+    yaraStatus.textContent = 'Aucune règle à ajouter.';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/yara/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: newRules + '\n'
+    });
+
+    if (!res.ok) throw new Error('Erreur mise à jour');
+
+    const data = await res.json();
+    yaraStatus.textContent = data.status || 'Règles YARA mises à jour.';
+    yaraNewArea.value = '';
+    loadYaraRules();
+  } catch (err) {
+    yaraStatus.textContent = '❌ Erreur lors de la mise à jour des règles YARA.';
+  }
+}
+
+
+// ===============================
+// INIT
+// ===============================
+updateYaraBtn.addEventListener('click', updateYaraRules);
+loadYaraRules();
