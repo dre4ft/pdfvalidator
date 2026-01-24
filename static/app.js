@@ -46,40 +46,19 @@ dropzone.addEventListener('click', () => {
 
 async function handleFiles(files) {
   if (!files.length) return;
+  log.textContent += '[REMOTE] Appel API /api/scan/remote\n';
+  const formData = new FormData();
+  files.forEach(f => formData.append('files', f));
 
-  const mode = toggle.checked ? 'remote' : 'local';
-  log.textContent = `Mode sélectionné : ${mode}\n`;
-
-  if (mode === 'local') {
-    const paths = files.map(f => f.name); 
-    log.textContent += '[LOCAL] Appel API /api/scan/local\n';
-
-    try {
-      const response = await fetch('/api/scan/local', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paths })
-      });
-      const result = await response.json();
-      log.textContent += `Réponse: ${JSON.stringify(result)}\n`;
-    } catch (err) {
-      log.textContent += `Erreur API: ${err}\n`;
-    }
-
-  } else {
-    log.textContent += '[REMOTE] Appel API /api/scan/remote\n';
-    const formData = new FormData();
-    files.forEach(f => formData.append('files', f));
-
-    try {
-      const response = await fetch('/api/scan/remote', {
-        method: 'POST',
-        body: formData
-      });
-      const result = await response.json();
-      log.textContent += `Réponse: ${JSON.stringify(result)}\n`;
-    } catch (err) {
-      log.textContent += `Erreur API: ${err}\n`;
-    }
+  try {
+    const response = await fetch('/api/scan/remote', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    log.textContent += `Réponse: ${JSON.stringify(result)}\n`;
+  } catch (err) {
+    log.textContent += `Erreur API: ${err}\n`;
   }
+  
 }

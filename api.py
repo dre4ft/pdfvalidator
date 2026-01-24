@@ -27,7 +27,7 @@ async def scan_remote(files: List[UploadFile] = File(...)):
 
     return JSONResponse(content={
     "mode": "remote",
-    "received_paths": saved_paths,
+    "received_paths": [f.filename for f in files],
     "status": result
     })
 
