@@ -54,8 +54,8 @@ dropzone.addEventListener('drop', e => {
 dropzone.addEventListener('click', () => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.pdf';
   input.multiple = true;
+  input.accept = '.pdf';
   input.onchange = () => handleFiles(Array.from(input.files));
   input.click();
 });
@@ -67,8 +67,14 @@ dropzone.addEventListener('click', () => {
 async function handleFiles(files) {
   if (!files.length) return;
 
+  // Afficher l'onglet scan si ce n'est pas le cas
   const scanTab = document.getElementById('tab-scan');
-  if (!scanTab.classList.contains('active')) return;
+  if (!scanTab.classList.contains('active')) {
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-tab="scan"]').classList.add('active');
+    scanTab.classList.add('active');
+  }
 
   log.textContent += '\n[REMOTE] Appel API /api/scan/remote\n';
 
