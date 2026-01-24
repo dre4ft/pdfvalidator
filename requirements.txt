@@ -2,3 +2,6 @@ fpdf2
 pypdf
 yara-python
 cryptography 
+fastapi
+uvicorn
+python-multipart

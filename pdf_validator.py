@@ -28,12 +28,13 @@ def pipeline(pdf_path: str) :
             erase_pipeline(pdf_path)
             if verdict == "suspect" :
                 log = "[*] Le fichier est suspect, conversion en PDF/A effectuée analyse complémentaire en cours..."
-                pipeline(pdfa_path)
+                log = f"{log} \n{pipeline(pdfa_path)}"
             else : 
                 log = "[+] Le fichier est bénin, conversion en PDF/A effectuée."
     with open('pipeline.log','a') as f :
         time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         f.write(f"{time} - {pdf_path} : {log}\n")
+    return log
 
 def runner(path: str) :
     if os.path.isfile(path) :
@@ -45,6 +46,12 @@ def runner(path: str) :
     else : 
         raise ValueError(f"{path} n'est ni un fichier ni un répertoire valide.")
 
+def api_runner(file_paths) :
+    to_return = {}
+    for path in file_paths :
+        log = pipeline(path)
+        to_return[path] = log
+    return to_return
 
 def main():
     if len(sys.argv) != 2 :
@@ -52,6 +59,7 @@ def main():
         sys.exit(1)
     input_path = sys.argv[1]
     runner(input_path) 
+ 
 
 if __name__ == "__main__":
     main()

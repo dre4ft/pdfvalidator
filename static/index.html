@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF Validator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>PDF Validator</h1>
+      <label class="toggle">
+        <span id="localLabel" class="active">Local</span>
+        <input type="checkbox" id="modeToggle" />
+        <span id="remoteLabel">Remote</span>
+      </label>
+    </div>
+
+    <div id="dropzone" class="dropzone">
+      <p>Glissez-déposez vos fichiers ou dossiers PDF ici</p>
+      <small>Cliquez ou déposez pour lancer l’analyse</small>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ <strong>Avertissement :</strong> Cette analyse repose exclusivement sur des règles YARA.
+      La qualité des résultats dépend directement de ces règles et peut donc être incomplète ou
+      produire des faux positifs / faux négatifs.
+    </div>
+
+    <div id="log" class="log"></div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
