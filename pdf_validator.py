@@ -3,6 +3,7 @@ from ghostscript import convert_to_pdfa
 import os 
 from datetime import datetime 
 import sys
+from shredder import erase_pipeline
 
 
 
@@ -20,11 +21,11 @@ def pipeline(pdf_path: str) :
     else : 
         if verdict == "malveillant" : 
             log = "[!] Le fichier est malveillant, suppression en cours..."
-            os.remove(pdf_path)
+            erase_pipeline(pdf_path)
         else : 
             pdfa_path = pdf_path.replace('.pdf','_pdfa.pdf')
             convert_to_pdfa(pdf_path, pdfa_path)
-            os.remove(pdf_path)
+            erase_pipeline(pdf_path)
             if verdict == "suspect" :
                 log = "[*] Le fichier est suspect, conversion en PDF/A effectuée analyse complémentaire en cours..."
                 pipeline(pdfa_path)
@@ -53,7 +54,7 @@ def main():
     runner(input_path) 
 
 if __name__ == "__main__":
-    #main()
-    pipeline("0_ea-2a_1108_pdfa_pdfa_pdfa.pdf")
+    main()
+
 
 

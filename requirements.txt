@@ -1,3 +1,4 @@
 fpdf2
 pypdf
 yara-python
+cryptography 
